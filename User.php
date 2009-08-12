@@ -128,6 +128,7 @@ class User {
 		
 		$this->CI->db->where('username', $username);
 		$this->CI->db->where('password', dohash($password));
+		$this->CI->db->limit(1);
 		$query = $this->CI->db->get('users');
 		
 		return $query->count_all_results() ? TRUE : FALSE;
