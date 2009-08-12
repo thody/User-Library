@@ -12,7 +12,6 @@ class User {
 
 	// Private variables
 	var $CI;
-	var $_user;
 	
 	/**
 	 * User Class Constructor
@@ -59,6 +58,18 @@ class User {
 	 */
 	function update($user_id, $user = array())
 	{
+		// Encrypt password if it's being changed
+		if (isset($user['password']))
+		{
+			$user['password'] = $this->_salt($user['password']);
+		}
+		
+		// If we're changing the current user's info, reset his session data
+		if ($user_id == $this->get_user_id())
+		{
+			$this->_set_user_session($user);
+		}
+		
 		$this->CI->db->where('id', $user_id);
 		return $this->CI->db->update('users', $user);
 	}
@@ -132,7 +143,7 @@ class User {
 		
 		if ($this->CI->db->count_all_results() > 0)
 		{
-			$this->CI->db->select('id, username, email');
+			$this->CI->db->select('id AS user_id, username, email');
 			$this->CI->db->where('username', $username);
 			$this->CI->db->where('password', $this->_salt($password));
 			$query = $this->CI->db->get('users');
