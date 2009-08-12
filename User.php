@@ -35,6 +35,7 @@ class User {
 		}
 		
 		// Load the Sessions class
+		$this->CI->load->database();
 		$this->CI->load->library('session', $config);
 			
 		// Grab the user data array from the session table, if it exists
@@ -57,6 +58,10 @@ class User {
 	 */
 	function create($user = array())
 	{
+		
+		// Encrypt password
+		$user['password'] = $this->_salt($user['password']);
+		
 		return $this->CI->db->insert('users', $user);
 	}
 
@@ -85,9 +90,19 @@ class User {
 	 * @param	string
 	 * @return	bool
 	 */
-	function delete($user_id)
+	function delete($identifier)
 	{
-		$this->CI->db->where('id', $user_id);
+		if (is_numeric($identifier))
+		{
+			$field = 'user_id';
+		}
+		else
+		{
+			$field = 'username';
+		}
+		
+		$this->CI->db->where($field, $identifier);
+		
 		return $this->CI->db->delete('users');
 	}
 	
@@ -101,15 +116,20 @@ class User {
 	 * @param	string
 	 * @return	bool
 	 */
-	function login($username, $password)
+	function login($username = null, $password = null)
 	{		
+		// Look for valid user
+		$user = $this->_test_user_credentials($username, $password);
+
 		// Handle failed login
-		if ( ! $this->_test_user_credentials($username, $password) )
+		if ( ! $user )
 		{
 			return FALSE;
 		}
 		
-		$this->_set_user_session();
+		$this->_set_user_session($user);
+		
+		return TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -124,14 +144,22 @@ class User {
 	 */
 	function _test_user_credentials($username, $password)
 	{		
-		$this->CI->load->helper('security');
-		
 		$this->CI->db->where('username', $username);
-		$this->CI->db->where('password', dohash($password));
-		$this->CI->db->limit(1);
-		$query = $this->CI->db->get('users');
+		$this->CI->db->where('password', $this->_salt($password));
+		$this->CI->db->from('users');
 		
-		return $query->count_all_results() ? TRUE : FALSE;
+		if ($this->CI->db->count_all_results() > 0)
+		{
+			$this->CI->db->select('id, username, email');
+			$this->CI->db->where('username', $username);
+			$this->CI->db->where('password', $this->_salt($password));
+			$query = $this->CI->db->get('users');
+			return $query->row_array();
+		}
+		else
+		{
+			return FALSE;
+		}
 	}
 	
 	// --------------------------------------------------------------------
@@ -145,7 +173,8 @@ class User {
 	 */
 	function _set_user_session($user = array())
 	{		
-		if ( $this->CI->session->set_userdata('user', $user) )
+		$this->CI->session->set_userdata('user', $user);
+		if ( true )
 		{
 			return TRUE;
 		}
@@ -165,7 +194,9 @@ class User {
 	 */
 	function logout()
 	{
-		return $this->CI->session->sess_destroy();
+		$this->CI->session->sess_destroy();
+		
+		return TRUE;
 	}
 	
 	// --------------------------------------------------------------------
@@ -178,7 +209,7 @@ class User {
 	 */
 	function logged_in()
 	{
-		if($this->CI->session->userdata('logged_in') == TRUE)
+		if(is_array($this->CI->session->userdata('user')))
 		{
 			return TRUE;
 		}
@@ -187,6 +218,8 @@ class User {
 			return FALSE;
 		}
 	}
+	
+	// --------------------------------------------------------------------
 	
    /**
 	* Salt and hash a string
@@ -197,8 +230,23 @@ class User {
 	*/
 	function _salt( $string )
 	{
+		$this->CI->load->helper('security');
 		return dohash($this->CI->config->item('encryption_key') . $string);
 	}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+		* Gets username from session
+		*
+		* @access public
+		* @return string
+		*/
+		function get_username()
+		{
+			$user = $this->CI->session->userdata('user');
+			return $user['username'];
+		}
 }
 // END User Class
 
