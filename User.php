@@ -10,40 +10,22 @@
  */
 class User {
 
-	// Private variables.  Do not change!
+	// Private variables
 	var $CI;
 	var $_user;
 	
 	/**
 	 * User Class Constructor
-	 *
-	 * The constructor loads the Session class, used to store the user info.
 	 */		
 	function User($params = array())
 	{	
-		// Set the super object to a local variable for use later
+		// Instantiate CI
 		$this->CI =& get_instance();
-		
-		// Are any config settings being passed manually?  If so, set them
-		$config = array();
-		if (count($params) > 0)
-		{
-			foreach ($params as $key => $val)
-			{
-				$config[$key] = $val;
-			}
-		}
 		
 		// Load the Sessions class
 		$this->CI->load->database();
 		$this->CI->load->library('session', $config);
 			
-		// Grab the user data array from the session table, if it exists
-		if ($this->CI->session->userdata('user') !== FALSE)
-		{
-			$this->_user = $this->CI->session->userdata('user');
-		}
-	
 		log_message('debug', "User Class Initialized");
 	}
 
@@ -94,7 +76,7 @@ class User {
 	{
 		if (is_numeric($identifier))
 		{
-			$field = 'user_id';
+			$field = 'id';
 		}
 		else
 		{
@@ -193,7 +175,7 @@ class User {
 	 * @return	bool
 	 */
 	function logout()
-	{
+	{	
 		$this->CI->session->sess_destroy();
 		
 		return TRUE;
