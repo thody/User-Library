@@ -247,6 +247,35 @@ class User {
 			$user = $this->CI->session->userdata('user');
 			return $user['username'];
 		}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+		* Gets user_id from session
+		*
+		* @access public
+		* @return string
+		*/
+		function get_user_id()
+		{
+			$user = $this->CI->session->userdata('user');
+			return $user['user_id'];
+		}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+		* Gets email from session
+		*
+		* @access public
+		* @return string
+		*/
+		function get_email()
+		{
+			$user = $this->CI->session->userdata('user');
+			return $user['email'];
+		}				
+		
 }
 // END User Class
 
