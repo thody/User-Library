@@ -114,7 +114,7 @@ class User {
 	 * @param	string
 	 * @return	bool
 	 */
-	function login($username = null, $password = null)
+	function login($username = NULL, $password = NULL, $persistent = FALSE)
 	{		
 		// Look for valid user
 		$user = $this->_test_user_credentials($username, $password);
@@ -125,7 +125,14 @@ class User {
 			return FALSE;
 		}
 		
+		// Set initial user session
 		$this->_set_user_session($user);
+		
+		// Set persistent session if requested
+		if ($persistent)
+		{
+			$this->_set_persistent_session($user);
+		}
 		
 		return TRUE;
 	}
@@ -150,11 +157,7 @@ class User {
 		if ($this->CI->db->count_all_results() > 0)
 		{
 			// Pull additional user info
-			$this->CI->db->select('id AS user_id, username, email');
-			$this->CI->db->where('username', $username);
-			$this->CI->db->where('password', $this->_salt($password));
-			$query = $this->CI->db->get('users');
-			return $query->row_array();
+			return $this->_get_user_array($username);
 		}
 		else
 		{
@@ -175,7 +178,140 @@ class User {
 	{		
 		$this->CI->session->set_userdata('user', $user);
 		return TRUE;
-	}	
+	}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Sets persistent user session
+	 *
+	 * @access	private
+	 * @param	array
+	 * @return	bool
+	 */
+	function _set_persistent_session($user = array())
+	{
+		$this->CI->load->helper('cookie');
+		
+		// Generate a reasonably unique value
+		$token = md5(mt_rand());
+		
+		// Set up session pair
+		$session_pair = array(
+			'username' => $user['username'],
+			'token' => $token
+			);
+			
+		// Set up cookie	
+		$cookie = array(
+			'name'   => 'persistent_session',
+			'value'  => implode('|', $session_pair),
+			'expire' => '86500'
+			);
+
+		set_cookie($cookie);
+		
+		// Add session pair to database
+		$this->CI->db->insert('persistent_sessions', $session_pair);
+		
+		return TRUE;
+	}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Checks for a persistent user session
+	 *
+	 * @access	public
+	 * @param	array
+	 * @return	bool
+	 */
+	function check_persistent_session()
+	{
+		$this->CI->load->helper('cookie');
+		
+		// Retrieve cookie pair
+		$cookie_pair = explode('|', get_cookie('persistent_session', TRUE));
+		
+		// If valid cookie exists, look for pair in the database
+		if (is_array($cookie_pair))
+		{
+			$this->CI->db->where('username', $cookie_pair[0]);
+			$this->CI->db->where('token', $cookie_pair[1]);
+			$valid_session = ($this->CI->db->count_all_results('persistent_sessions') > 0) ? TRUE : FALSE;
+		}
+		
+		if ($valid_session)
+		{
+			// Get user data
+			$user = $this->_get_user_array($cookie_pair[0]);
+			
+			// Reset persistent session
+			$this->_reset_persistent_session($user, $cookie_pair[1]);
+			
+			// Generate normal session
+			$this->_set_user_session($user);
+			
+			return TRUE;			
+		}
+		
+		return FALSE;
+	}
+	
+	// --------------------------------------------------------------------
+
+	/**
+	 * Resets the persistent session data
+	 *
+	 * @access	private
+	 * @param array
+	 * @param string
+	 * @return	bool
+	 */
+	function _reset_persistent_session($user, $token)
+	{	
+		// Delete current db entry
+		$this->_delete_persistent_session($user['username'], $token);
+		
+		// Set new persistent session
+		$this->_set_persistent_session($user);
+	}
+	
+	// --------------------------------------------------------------------
+
+	/**
+	 * Deletes a persistent session data
+	 *
+	 * @access	private
+	 * @param string
+	 * @param string
+	 */
+	function _delete_persistent_session($username, $token)
+	{	
+		// Delete current db entry
+		$this->CI->db->where('username', $username);
+		$this->CI->db->where('token', $token);
+		$this->CI->db->delete('persistent_sessions');
+	}
+	
+	
+	
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Get safe user data
+	 *
+	 * @access	private
+	 * @param string
+	 * @return	bool
+	 */
+	function _get_user_array($username)
+	{	
+		$this->CI->db->select('id AS user_id, username, email');
+		$this->CI->db->where('username', $username);
+		$query = $this->CI->db->get('users');
+		return $query->row_array();
+	}
 	
 	// --------------------------------------------------------------------
 	
@@ -187,6 +323,13 @@ class User {
 	 */
 	function logout()
 	{	
+		$this->CI->load->helper('cookie');
+		
+		// Destroy persistent session
+		$cookie_pair = explode('|', get_cookie('persistent_session', TRUE));
+		$this->_delete_persistent_session($cookie_pair[0], $cookie_pair[1]);
+		
+		// Destroy session
 		$this->CI->session->sess_destroy();
 		return TRUE;
 	}
