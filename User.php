@@ -195,7 +195,7 @@ class User {
 	 */
 	function logged_in()
 	{
-		if(is_array($this->CI->session->userdata('user')))
+		if (is_array($this->CI->session->userdata('user')))
 		{
 			return TRUE;
 		}
