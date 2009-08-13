@@ -89,6 +89,7 @@ class User {
 	 */
 	function delete($identifier)
 	{
+		// Check if we're dealing with the username or the user id
 		if (is_numeric($identifier))
 		{
 			$field = 'id';
@@ -140,13 +141,15 @@ class User {
 	 * @return	bool
 	 */
 	function _test_user_credentials($username, $password)
-	{		
+	{
+		// Check username and pw		
 		$this->CI->db->where('username', $username);
 		$this->CI->db->where('password', $this->_salt($password));
 		$this->CI->db->from('users');
 		
 		if ($this->CI->db->count_all_results() > 0)
 		{
+			// Pull additional user info
 			$this->CI->db->select('id AS user_id, username, email');
 			$this->CI->db->where('username', $username);
 			$this->CI->db->where('password', $this->_salt($password));
@@ -185,7 +188,6 @@ class User {
 	function logout()
 	{	
 		$this->CI->session->sess_destroy();
-		
 		return TRUE;
 	}
 	
@@ -199,7 +201,7 @@ class User {
 	 */
 	function logged_in()
 	{
-		if(is_array($this->CI->session->userdata('user')))
+		if (is_array($this->CI->session->userdata('user')))
 		{
 			return TRUE;
 		}
