@@ -23,7 +23,7 @@ class User {
 		
 		// Load the Sessions class
 		$this->CI->load->database();
-		$this->CI->load->library('session', $config);
+		$this->CI->load->library('session');
 			
 		log_message('debug', "User Class Initialized");
 	}
