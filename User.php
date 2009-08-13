@@ -206,7 +206,7 @@ class User {
 		$cookie = array(
 			'name'   => 'persistent_session',
 			'value'  => implode('|', $session_pair),
-			'expire' => '86500'
+			'expire' => 60 * 60 * 24 * 91 // set to 3 months and 1 day, since persistent session table should be cleared out every 3 months
 			);
 
 		set_cookie($cookie);
