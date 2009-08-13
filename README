@@ -16,3 +16,10 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM;
+
+CREATE TABLE `persistent_sessions` (
+  `username` varchar(255) NOT NULL,
+  `token` varchar(32) NOT NULL,
+  `date_created` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  PRIMARY KEY  (`username`,`token`)
+) ENGINE=MyISAM;
