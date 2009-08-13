@@ -171,14 +171,7 @@ class User {
 	function _set_user_session($user = array())
 	{		
 		$this->CI->session->set_userdata('user', $user);
-		if ( true )
-		{
-			return TRUE;
-		}
-		else
-		{ 
-			return FALSE;
-		}		
+		return TRUE;
 	}	
 	
 	// --------------------------------------------------------------------
