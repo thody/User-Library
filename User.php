@@ -266,7 +266,39 @@ class User {
 		{
 			$user = $this->CI->session->userdata('user');
 			return $user['email'];
-		}				
+		}
+		
+	// --------------------------------------------------------------------
+
+	/**
+		* Checks if a username is already in the database
+		*
+		* @access public
+		* @param string
+		* @return boolean
+		*/
+		function check_username($username)
+		{
+			$this->CI->db->where('username', $username);
+			$this->CI->db->from('users');
+			return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
+		}
+		
+	// --------------------------------------------------------------------
+
+	/**
+		* Checks if an email is already in the database
+		*
+		* @access public
+		* @param string
+		* @return boolean
+		*/
+		function check_email($email)
+		{
+			$this->CI->db->where('email', $email);
+			$this->CI->db->from('users');
+			return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
+		}			
 		
 }
 // END User Class
