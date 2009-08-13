@@ -64,14 +64,18 @@ class User {
 			$user['password'] = $this->_salt($user['password']);
 		}
 		
+		$this->CI->db->where('id', $user_id);
+		$update = $this->CI->db->update('users', $user);
+		
 		// If we're changing the current user's info, reset his session data
 		if ($user_id == $this->get_user_id())
 		{
+			// unset password to prevent it from being stored in the session
+			unset($user['password']);
 			$this->_set_user_session($user);
 		}
 		
-		$this->CI->db->where('id', $user_id);
-		return $this->CI->db->update('users', $user);
+		return $update;
 	}
 	
 	// --------------------------------------------------------------------
