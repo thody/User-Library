@@ -114,8 +114,11 @@ class User {
 	 * @param	string
 	 * @return	bool
 	 */
-	function login($username = NULL, $password = NULL, $persistent = FALSE)
-	{		
+	function login($username = FALSE, $password = FALSE, $persistent = FALSE)
+	{
+		// Make sure $username and $password are set
+		if ( ! $username || ! $password ) return FALSE;
+		
 		// Look for valid user
 		$user = $this->_test_user_credentials($username, $password);
 
