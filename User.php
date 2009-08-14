@@ -39,6 +39,11 @@ class User {
 	 */
 	function create($user = array())
 	{
+		// Make sure minimum fields are set
+		if (empty($user['username']) || empty($user['password']) || empty($user['email'])) return FALSE;
+		
+		// Return false if username already exists (replace this with more useful error info)
+		if ($this->check_username($user['username'])) return FALSE;
 		
 		// Encrypt password
 		$user['password'] = $this->_salt($user['password']);
@@ -392,7 +397,7 @@ class User {
 		* Gets user_id from session
 		*
 		* @access public
-		* @return string
+		* @return int
 		*/
 		function get_user_id()
 		{
