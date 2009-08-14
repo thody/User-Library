@@ -394,10 +394,10 @@ class User {
 	 * @param string
 	 * @return string
 	 */
-	function _get_session_attr($name)
+	function _get_session_attr($field)
 	{
 		$user = $this->CI->session->userdata('user');
-		return $user[$name];
+		return $user[$field];
 	}
 
 	// --------------------------------------------------------------------
@@ -410,10 +410,11 @@ class User {
 	 * @return string
 	 */	
 	
-	function get_meta($name)
+	function get_meta($field)
 	{
-		switch ($name)
+		switch ($field)
 		{
+			// Pull this meta from the session
 			case 'user_id' :
 				return $this->_get_session_attr('user_id');
 				break;
@@ -422,14 +423,15 @@ class User {
 				return $this->_get_session_attr('username');
 				break;
 			
+			// Pull this meta from the db
 			case 'email' :
-				$this->CI->db->select($name);
+				$this->CI->db->select($field);
 				$this->CI->db->from('users');
 				$this->CI->db->where('id', $this->_get_session_attr('user_id'));
 				break;
 			
 			default :
-				$this->CI->db->select($name);
+				$this->CI->db->select($field);
 				$this->CI->db->from('user_meta');
 				$this->CI->db->where('user_id', $this->_get_session_attr('user_id'));
 				break;
@@ -438,7 +440,42 @@ class User {
 		$query = $this->CI->db->get();
 		$row = $query->row();
 		
-		return (!empty($row->{$name})) ? $row->{$name} : NULL;
+		return (!empty($row->{$field})) ? $row->{$field} : NULL;
+	}
+	
+	// --------------------------------------------------------------------
+
+	/**
+	 * Sets user meta
+	 *
+	 * @access public
+	 * @param string
+	 * @param string
+	 * @return boolean
+	 */	
+	
+	function set_meta($field, $value)
+	{
+		// Determine which table to update
+		$update_table = (in_array($field, array('username','email'))) ? 'users' : 'user_meta';
+		
+		// Determine where field
+		$where_field = ($update_table == 'users') ? 'id' : 'user_id';
+		
+		// If we're changing the username, make sure it doesn't already exist
+		if ($field == 'username')
+		{
+			if ($this->check_username($value)) return FALSE;
+		}
+		
+		// If we're updating the user_meta table, make sure the field exists
+		if (!$this->db->field_exists($field, 'user_meta')) return FALSE;
+		
+		// Update field value
+		$this->CI->db->where($where_field, $this->_get_session_attr('user_id'));
+		$this->CI->db->update($update_table, array($field => $value));
+		
+		return TRUE;
 	}
 		
 	// --------------------------------------------------------------------
@@ -454,6 +491,8 @@ class User {
 	{
 		$this->CI->db->where('username', $username);
 		$this->CI->db->from('users');
+		
+		// Returns true if username is already in the DB
 		return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
 	}
 		
