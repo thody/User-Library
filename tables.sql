@@ -9,19 +9,20 @@ CREATE TABLE `ci_sessions` (
   `last_activity` int(10) unsigned NOT NULL default '0',
   `user_data` text NOT NULL,
   PRIMARY KEY  (`session_id`)
-) ENGINE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL auto_increment,
-  `username` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM;
 
 CREATE TABLE `persistent_sessions` (
   `username` varchar(255) NOT NULL,
   `token` varchar(32) NOT NULL,
   `date_created` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`username`,`token`)
-) ENGINE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+CREATE TABLE `users` (
+  `id` int(8) unsigned NOT NULL auto_increment,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(40) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
