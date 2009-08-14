@@ -40,6 +40,7 @@ class User {
 	function create($user = array())
 	{
 		// Make sure minimum fields are set
+		// Note: username/password validation criteria are application specific and should't be established here
 		if (empty($user['username']) || empty($user['password']) || empty($user['email'])) return FALSE;
 		
 		// Return false if username already exists (replace this with more useful error info)
