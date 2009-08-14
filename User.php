@@ -6,7 +6,7 @@
  * @category	User Library
  * @author		Adam Thody
  * @link		http://www.adamthody.com
- * @version		0.1
+ * @version		0.2
  */
 class User {
 
@@ -49,7 +49,14 @@ class User {
 		// Encrypt password
 		$user['password'] = $this->_salt($user['password']);
 		
-		return $this->CI->db->insert('users', $user);
+		// Note: setting up insert array manually to ensure only valid fields are entered
+		// additional user fields should be handled via join with meta table (?)
+		$insert_user = array(
+			'username' => $user['username'],
+			'password' => $user['password'],
+			'email' => $user['email']
+			);
+		return $this->CI->db->insert('users', $insert_user);
 	}
 
 	// --------------------------------------------------------------------
