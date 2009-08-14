@@ -34,17 +34,19 @@ class User {
 	 * Insert user into the users table
 	 *
 	 * @access	public
-	 * @param	array
+	 * @param	array	$user
 	 * @return	bool
 	 */
 	function create($user = array())
 	{
 		// Make sure required fields are set
 		// Note: username/password validation criteria are application specific and should't be established here
-		if (empty($user['username']) || empty($user['password']) || empty($user['email'])) return FALSE;
+		if (empty($user['username']) OR empty($user['password']) OR empty($user['email']))
+			return FALSE;
 		
 		// Return false if username already exists (replace this with more useful error info)
-		if ($this->check_username($user['username'])) return FALSE;
+		if ($this->check_username($user['username']))
+			return FALSE;
 		
 		// Encrypt password
 		$user['password'] = $this->_salt($user['password']);
@@ -65,8 +67,8 @@ class User {
 	 * Update user in the users table
 	 *
 	 * @access	public
-	 * @param	string
-	 * @param	array
+	 * @param	string	$user_id
+	 * @param	array	$user
 	 * @return	bool
 	 */
 	function update($user_id, $user = array())
@@ -97,20 +99,13 @@ class User {
 	 * Delete user from the users table
 	 *
 	 * @access	public
-	 * @param	string
+	 * @param	string	$identifier		Can be user's ID or user's username
 	 * @return	bool
 	 */
 	function delete($identifier)
 	{
 		// Check if we're dealing with the username or the user id
-		if (is_numeric($identifier))
-		{
-			$field = 'id';
-		}
-		else
-		{
-			$field = 'username';
-		}
+		$field = (is_numeric($identifier)) ? "id" : "username";
 		
 		$this->CI->db->where($field, $identifier);
 		
@@ -123,23 +118,23 @@ class User {
 	 * Login user
 	 *
 	 * @access	public
-	 * @param	string
-	 * @param	string
+	 * @param	string	$username
+	 * @param	string	$password	Unencrypted version 
+	 * @param	bool	$persistent	
 	 * @return	bool
 	 */
 	function login($username = FALSE, $password = FALSE, $persistent = FALSE)
 	{
 		// Make sure $username and $password are set
-		if ( ! $username || ! $password ) return FALSE;
+		if ( !( $username AND $password ) )
+			return FALSE;
 		
 		// Look for valid user
 		$user = $this->_test_user_credentials($username, $password);
 
 		// Handle failed login
 		if ( ! $user )
-		{
 			return FALSE;
-		}
 		
 		// Set initial user session
 		$this->_set_user_session($user);
@@ -159,8 +154,8 @@ class User {
 	 * Test user credentials
 	 *
 	 * @access	private
-	 * @param	string
-	 * @param	string
+	 * @param	string	$username
+	 * @param	string	$password	Unencrypted version
 	 * @return	bool
 	 */
 	function _test_user_credentials($username, $password)
@@ -187,7 +182,7 @@ class User {
 	 * Sets user session
 	 *
 	 * @access	private
-	 * @param	array
+	 * @param	array	$user
 	 * @return	bool
 	 */
 	function _set_user_session($user = array())
@@ -202,7 +197,7 @@ class User {
 	 * Sets persistent user session
 	 *
 	 * @access	private
-	 * @param	array
+	 * @param	array	$user
 	 * @return	bool
 	 */
 	function _set_persistent_session($user = array())
@@ -239,7 +234,6 @@ class User {
 	 * Checks for a persistent user session
 	 *
 	 * @access	public
-	 * @param	array
 	 * @return	bool
 	 */
 	function check_persistent_session()
@@ -280,8 +274,8 @@ class User {
 	 * Resets the persistent session data
 	 *
 	 * @access	private
-	 * @param array
-	 * @param string
+	 * @param array		$user	
+	 * @param string	$token
 	 * @return	bool
 	 */
 	function _reset_persistent_session($user, $token)
@@ -299,8 +293,9 @@ class User {
 	 * Deletes a persistent session data
 	 *
 	 * @access	private
-	 * @param string
-	 * @param string
+	 * @param string	$username
+	 * @param string	$token
+	 * @return bool
 	 */
 	function _delete_persistent_session($username, $token)
 	{	
@@ -308,6 +303,8 @@ class User {
 		$this->CI->db->where('username', $username);
 		$this->CI->db->where('token', $token);
 		$this->CI->db->delete('persistent_sessions');
+
+		return TRUE; // @todo  We might start checking results on db->delete's laterWe might start checking results on db->delete's later
 	}
 	
 	
@@ -318,15 +315,19 @@ class User {
 	 * Get safe user data
 	 *
 	 * @access	private
-	 * @param string
-	 * @return	bool
+	 * @param string	$username
+	 * @return	array
 	 */
 	function _get_user_array($username)
 	{	
 		$this->CI->db->select('id AS user_id, username');
 		$this->CI->db->where('username', $username);
 		$query = $this->CI->db->get('users');
-		return $query->row_array();
+
+		if ($query->num_rows() == 1)
+			return $query->row_array();
+		else
+			return FALSE;
 	}
 	
 	// --------------------------------------------------------------------
@@ -347,6 +348,8 @@ class User {
 		
 		// Destroy session
 		$this->CI->session->sess_destroy();
+
+		// @todo the only reason we would want to return TRUE here is /if/ we could return FALSE under some circumstances?
 		return TRUE;
 	}
 	
@@ -360,14 +363,7 @@ class User {
 	 */
 	function logged_in()
 	{
-		if (is_array($this->CI->session->userdata('user')))
-		{
-			return TRUE;
-		}
-		else
-		{
-			return FALSE;
-		}
+		return (is_array($this->CI->session->userdata('user')))  ?  TRUE  :  FALSE;
 	}
 	
 	// --------------------------------------------------------------------
@@ -376,13 +372,13 @@ class User {
 	 * Salt and hash a string
 	 *
 	 * @access private
-	 * @param string
+	 * @param string	$string_to_salt
 	 * @return string
 	 */
-	function _salt( $string )
+	function _salt( $string_to_salt )
 	{
 		$this->CI->load->helper('security');
-		return dohash($this->CI->config->item('encryption_key') . $string);
+		return dohash($this->CI->config->item('encryption_key') . $string_to_salt);
 	}
 	
 	// --------------------------------------------------------------------
@@ -391,13 +387,17 @@ class User {
 	 * Gets attr from session array
 	 *
 	 * @access private
-	 * @param string
+	 * @param string	$attr_to_get
 	 * @return string
 	 */
-	function _get_session_attr($name)
+	function _get_session_attr($attr_to_get)
 	{
 		$user = $this->CI->session->userdata('user');
-		return $user[$name];
+
+		if (isset ($user[$attr_to_get]))
+			return $user[$attr_to_get];
+		else
+			return FALSE;
 	}
 
 	// --------------------------------------------------------------------
@@ -406,30 +406,27 @@ class User {
 	 * Gets user meta
 	 *
 	 * @access public
-	 * @param string
+	 * @param string	$attr_to_get
 	 * @return string
 	 */	
 	
-	function get_meta($name)
+	function get_meta($attr_to_get)
 	{
-		switch ($name)
+		switch ($attr_to_get)
 		{
 			case 'user_id' :
-				return $this->_get_session_attr('user_id');
-				break;
-				
 			case 'username' :
-				return $this->_get_session_attr('username');
+				return $this->_get_session_attr($attr_to_get);
 				break;
 			
 			case 'email' :
-				$this->CI->db->select($name);
+				$this->CI->db->select($attr_to_get);
 				$this->CI->db->from('users');
 				$this->CI->db->where('id', $this->_get_session_attr('user_id'));
 				break;
 			
 			default :
-				$this->CI->db->select($name);
+				$this->CI->db->select($attr_to_get);
 				$this->CI->db->from('user_meta');
 				$this->CI->db->where('user_id', $this->_get_session_attr('user_id'));
 				break;
@@ -438,7 +435,7 @@ class User {
 		$query = $this->CI->db->get();
 		$row = $query->row();
 		
-		return (!empty($row->{$name})) ? $row->{$name} : NULL;
+		return (!empty($row->{$attr_to_get})) ? $row->{$attr_to_get} : NULL;
 	}
 		
 	// --------------------------------------------------------------------
@@ -447,7 +444,7 @@ class User {
 	 * Checks if a username is already in the database
 	 *
 	 * @access public
-	 * @param string
+	 * @param string	$username
 	 * @return boolean
 	 */
 	function check_username($username)
@@ -463,7 +460,7 @@ class User {
 	 * Checks if an email is already in the database
 	 *
 	 * @access public
-	 * @param string
+	 * @param string	$email
 	 * @return boolean
 	 */
 	function check_email($email)
