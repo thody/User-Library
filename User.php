@@ -463,10 +463,7 @@ class User {
 		$where_field = ($update_table == 'users') ? 'id' : 'user_id';
 		
 		// If we're changing the username, make sure it doesn't already exist
-		if ($field == 'username')
-		{
-			if ($this->check_username($value)) return FALSE;
-		}
+		if ($field == 'username' && $this->check_username($value)) return FALSE;
 		
 		// If we're updating the user_meta table, make sure the field exists
 		if (!$this->db->field_exists($field, 'user_meta')) return FALSE;
