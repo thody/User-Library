@@ -6,7 +6,7 @@
  * @category	User Library
  * @author		Adam Thody
  * @link		http://www.adamthody.com
- * @version		0.2
+ * @version		0.2.2
  */
 class User {
 
