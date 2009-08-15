@@ -45,7 +45,7 @@ class User {
 			return FALSE;
 		
 		// Return false if username already exists (replace this with more useful error info)
-		if ($this->check_username($user['username']))
+		if (!$this->is_available_username($user['username']))
 			return FALSE;
 		
 		// Encrypt password
@@ -459,7 +459,7 @@ class User {
 		$where_field = ($update_table == 'users') ? 'id' : 'user_id';
 		
 		// If we're changing the username, make sure it doesn't already exist
-		if ($attr_to_set == 'username' AND $this->check_username($value)) return FALSE;
+		if ($attr_to_set == 'username' AND !$this->is_available_username($value)) return FALSE;
 		
 		// If we're updating the user_meta table, make sure the field exists
 		if (!$this->db->field_exists($attr_to_set, 'user_meta')) return FALSE;
@@ -480,13 +480,12 @@ class User {
 	 * @param string	$username
 	 * @return boolean
 	 */
-	function check_username($username)
+	function is_available_username($username)
 	{
 		$this->CI->db->where('username', $username);
 		$this->CI->db->from('users');
 		
-		// Returns true if username is already in the DB
-		return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
+		return ($this->CI->db->count_all_results() > 0) ? FALSE : TRUE;
 	}
 		
 	// --------------------------------------------------------------------
