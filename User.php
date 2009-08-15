@@ -6,7 +6,7 @@
  * @category	User Library
  * @author		Adam Thody
  * @link		http://www.adamthody.com
- * @version		0.2.1
+ * @version		0.2.2
  */
 class User {
 
@@ -323,7 +323,7 @@ class User {
 	 */
 	function _get_user_array($username)
 	{	
-		$this->CI->db->select('id AS user_id, username, email');
+		$this->CI->db->select('id AS user_id, username');
 		$this->CI->db->where('username', $username);
 		$query = $this->CI->db->get('users');
 		return $query->row_array();
@@ -372,13 +372,13 @@ class User {
 	
 	// --------------------------------------------------------------------
 	
-   /**
-	* Salt and hash a string
-	*
-	* @access private
-	* @param string
-	* @return string
-	*/
+   	/**
+	 * Salt and hash a string
+	 *
+	 * @access private
+	 * @param string
+	 * @return string
+	 */
 	function _salt( $string )
 	{
 		$this->CI->load->helper('security');
@@ -388,76 +388,126 @@ class User {
 	// --------------------------------------------------------------------
 	
 	/**
-		* Gets username from session
-		*
-		* @access public
-		* @return string
-		*/
-		function get_username()
+	 * Gets attr from session array
+	 *
+	 * @access private
+	 * @param string
+	 * @return string
+	 */
+	function _get_session_attr($field)
+	{
+		$user = $this->CI->session->userdata('user');
+		return $user[$field];
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Gets user meta
+	 *
+	 * @access public
+	 * @param string
+	 * @return string
+	 */	
+	
+	function get_meta($field)
+	{
+		switch ($field)
 		{
-			$user = $this->CI->session->userdata('user');
-			return $user['username'];
+			// Pull this meta from the session
+			case 'user_id' :
+				return $this->_get_session_attr('user_id');
+				break;
+				
+			case 'username' :
+				return $this->_get_session_attr('username');
+				break;
+			
+			// Pull this meta from the db
+			case 'email' :
+				$this->CI->db->select($field);
+				$this->CI->db->from('users');
+				$this->CI->db->where('id', $this->_get_session_attr('user_id'));
+				break;
+			
+			default :
+				$this->CI->db->select($field);
+				$this->CI->db->from('user_meta');
+				$this->CI->db->where('user_id', $this->_get_session_attr('user_id'));
+				break;
 		}
+		
+		$query = $this->CI->db->get();
+		$row = $query->row();
+		
+		return (!empty($row->{$field})) ? $row->{$field} : NULL;
+	}
 	
 	// --------------------------------------------------------------------
-	
+
 	/**
-		* Gets user_id from session
-		*
-		* @access public
-		* @return int
-		*/
-		function get_user_id()
-		{
-			$user = $this->CI->session->userdata('user');
-			return $user['user_id'];
-		}
+	 * Sets user meta
+	 *
+	 * @access public
+	 * @param string
+	 * @param string
+	 * @return boolean
+	 */	
 	
-	// --------------------------------------------------------------------
-	
-	/**
-		* Gets email from session
-		*
-		* @access public
-		* @return string
-		*/
-		function get_email()
-		{
-			$user = $this->CI->session->userdata('user');
-			return $user['email'];
-		}
+	function set_meta($field, $value)
+	{
+		// Determine which table to update
+		$update_table = (in_array($field, array('username','email'))) ? 'users' : 'user_meta';
+		
+		// Determine where field
+		$where_field = ($update_table == 'users') ? 'id' : 'user_id';
+		
+		// If we're changing the username, make sure it doesn't already exist
+		if ($field == 'username' && $this->check_username($value)) return FALSE;
+		
+		// If we're updating the user_meta table, make sure the field exists
+		if (!$this->db->field_exists($field, 'user_meta')) return FALSE;
+		
+		// Update field value
+		$this->CI->db->where($where_field, $this->_get_session_attr('user_id'));
+		$this->CI->db->update($update_table, array($field => $value));
+		
+		return TRUE;
+	}
 		
 	// --------------------------------------------------------------------
 
 	/**
-		* Checks if a username is already in the database
-		*
-		* @access public
-		* @param string
-		* @return boolean
-		*/
-		function check_username($username)
-		{
-			$this->CI->db->where('username', $username);
-			$this->CI->db->from('users');
-			return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
-		}
+	 * Checks if a username is already in the database
+	 *
+	 * @access public
+	 * @param string
+	 * @return boolean
+	 */
+	function check_username($username)
+	{
+		$this->CI->db->where('username', $username);
+		$this->CI->db->from('users');
+		
+		// Returns true if username is already in the DB
+		return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
+	}
 		
 	// --------------------------------------------------------------------
 
 	/**
-		* Checks if an email is already in the database
-		*
-		* @access public
-		* @param string
-		* @return boolean
-		*/
-		function check_email($email)
-		{
-			$this->CI->db->where('email', $email);
-			$this->CI->db->from('users');
-			return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
-		}			
+	 * Checks if an email is already in the database
+	 *
+	 * @access public
+	 * @param string
+	 * @return boolean
+	 */
+	function check_email($email)
+	{
+		$this->CI->db->where('email', $email);
+		$this->CI->db->from('users');
+		return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
+	}		
 		
 }
 // END User Class
