@@ -409,8 +409,6 @@ class User {
 	 * @param string	$attr_to_get
 	 * @return string
 	 */	
-	
-
 	function get_meta($attr_to_get)
 	{
 		switch ($attr_to_get)
@@ -447,28 +445,28 @@ class User {
 	 * Sets user meta
 	 *
 	 * @access public
-	 * @param string
-	 * @param string
+	 * @param string	$attr_to_set
+	 * @param string	$value
 	 * @return boolean
 	 */	
 	
-	function set_meta($field, $value)
+	function set_meta($attr_to_set, $value)
 	{
 		// Determine which table to update
-		$update_table = (in_array($field, array('username','email'))) ? 'users' : 'user_meta';
+		$update_table = (in_array($attr_to_set, array('username','email'))) ? 'users' : 'user_meta';
 		
 		// Determine where field
 		$where_field = ($update_table == 'users') ? 'id' : 'user_id';
 		
 		// If we're changing the username, make sure it doesn't already exist
-		if ($field == 'username' AND $this->check_username($value)) return FALSE;
+		if ($attr_to_set == 'username' AND $this->check_username($value)) return FALSE;
 		
 		// If we're updating the user_meta table, make sure the field exists
-		if (!$this->db->field_exists($field, 'user_meta')) return FALSE;
+		if (!$this->db->field_exists($attr_to_set, 'user_meta')) return FALSE;
 		
 		// Update field value
 		$this->CI->db->where($where_field, $this->_get_session_attr('user_id'));
-		$this->CI->db->update($update_table, array($field => $value));
+		$this->CI->db->update($update_table, array($attr_to_set => $value));
 		
 		return TRUE;
 	}
