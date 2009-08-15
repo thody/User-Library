@@ -497,11 +497,11 @@ class User {
 	 * @param string	$email
 	 * @return boolean
 	 */
-	function check_email($email)
+	function is_available_email($email)
 	{
 		$this->CI->db->where('email', $email);
 		$this->CI->db->from('users');
-		return ($this->CI->db->count_all_results() > 0) ? TRUE : FALSE;
+		return ($this->CI->db->count_all_results() > 0) ? FALSE : TRUE;
 	}		
 		
 }
