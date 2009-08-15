@@ -236,7 +236,7 @@ class User {
 	 * @access	public
 	 * @return	bool
 	 */
-	function check_persistent_session()
+	function is_persistent_session()
 	{
 		$this->CI->load->helper('cookie');
 		
