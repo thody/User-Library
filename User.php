@@ -124,9 +124,9 @@ class User {
 	 * @access	public
 	 * @return	bool
 	 */
-	function logged_in()
+	function is_logged_in()
 	{
-		return $this->CI->user_adapter->logged_in();
+		return $this->CI->user_adapter->is_logged_in();
 	}
 	
 	// --------------------------------------------------------------------
