@@ -300,7 +300,7 @@ class User_db {
 	function _delete_persistent_session($identity, $token)
 	{	
 		// Delete current db entry
-		$this->CI->db->where($this->identity_column, $identity);
+		$this->CI->db->where('identity', $identity);
 		$this->CI->db->where('token', $token);
 		$this->CI->db->delete('persistent_sessions');
 
