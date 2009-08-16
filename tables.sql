@@ -15,24 +15,16 @@ CREATE TABLE `ci_sessions` (
 
 CREATE TABLE `persistent_sessions` (
   `id` int(8) unsigned NOT NULL auto_increment,
-  `username` varchar(255) NOT NULL,
+  `identity` varchar(255) NOT NULL,
   `token` varchar(32) NOT NULL,
   `date_created` timestamp NOT NULL default CURRENT_TIMESTAMP,
-  PRIMARY KEY  (`username`,`token`)
+  PRIMARY KEY  (`identity`,`token`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE `users` (
   `id` int(8) unsigned NOT NULL auto_increment,
-  `username` varchar(255) NOT NULL,
-  `password` varchar(40) NOT NULL,
   `email` varchar(255) NOT NULL,
+  `password` varchar(40) NOT NULL
   PRIMARY KEY  (`id`),
-  UNIQUE KEY `username` (`username`)
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
-
-CREATE TABLE `user_meta` (
-  `id` int(8) unsigned NOT NULL auto_increment,
-  `user_id` int(8) unsigned NOT NULL,
-  PRIMARY KEY  (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
