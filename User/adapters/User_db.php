@@ -141,9 +141,7 @@ class User_db {
 		
 		// Set persistent session if requested
 		if ($persistent)
-		{
 			$this->_set_persistent_session($user);
-		}
 		
 		return TRUE;
 	}
@@ -306,8 +304,6 @@ class User_db {
 
 		return TRUE; // @todo  We might start checking results on db->delete's laterWe might start checking results on db->delete's later
 	}
-	
-	
 	
 	// --------------------------------------------------------------------
 	
