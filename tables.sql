@@ -3,7 +3,6 @@
 -- --------------------------------------------------------
 
 CREATE TABLE `ci_sessions` (
-  `id` int(8) unsigned NOT NULL auto_increment,
   `session_id` varchar(40) NOT NULL default '0',
   `ip_address` varchar(16) NOT NULL default '0',
   `user_agent` varchar(50) NOT NULL,
@@ -14,7 +13,6 @@ CREATE TABLE `ci_sessions` (
 
 
 CREATE TABLE `persistent_sessions` (
-  `id` int(8) unsigned NOT NULL auto_increment,
   `identity` varchar(255) NOT NULL,
   `token` varchar(32) NOT NULL,
   `date_created` timestamp NOT NULL default CURRENT_TIMESTAMP,
