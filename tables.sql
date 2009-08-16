@@ -22,7 +22,7 @@ CREATE TABLE `persistent_sessions` (
 CREATE TABLE `users` (
   `id` int(8) unsigned NOT NULL auto_increment,
   `email` varchar(255) NOT NULL,
-  `password` varchar(40) NOT NULL
+  `password` varchar(40) NOT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
