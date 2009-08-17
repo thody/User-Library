@@ -419,7 +419,7 @@ class User_db {
 			default :
 				$this->CI->db->select($attr_to_get);
 				$this->CI->db->from($this->table);
-				$this->CI->db->where('user_id', $this->_get_session_attr('user_id'));
+				$this->CI->db->where('id', $this->_get_session_attr('user_id'));
 				break;
 		}
 		
