@@ -399,23 +399,23 @@ class User_db {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Gets user meta
+	 * Gets user attributes
 	 *
 	 * @access public
 	 * @param string	$attr_to_get
 	 * @return string
 	 */	
-	function get_meta($attr_to_get)
+	function get_attr($attr_to_get)
 	{
 		switch ($attr_to_get)
 		{
-			// Pull this meta from the session
+			// Pull this attr from the session
 			case 'user_id' :
 			case 'username' :
 				return $this->_get_session_attr($attr_to_get);
 				break;
 			
-			// Pull this meta from the db
+			// Pull this attr from the db
 			default :
 				$this->CI->db->select($attr_to_get);
 				$this->CI->db->from($this->table);
@@ -432,7 +432,7 @@ class User_db {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Sets user meta
+	 * Sets user attributes
 	 *
 	 * @access public
 	 * @param string	$attr_to_set
@@ -440,7 +440,7 @@ class User_db {
 	 * @return boolean
 	 */	
 	
-	function set_meta($attr_to_set, $value)
+	function set_attr($attr_to_set, $value)
 	{		
 		// If we're changing the username, make sure it doesn't already exist
 		if ($attr_to_set == $this->identity_column AND !$this->is_available_identity($value)) return FALSE;

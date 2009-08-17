@@ -132,21 +132,21 @@ class User {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Gets user meta
+	 * Gets user attributes
 	 *
 	 * @access public
 	 * @param string	$attr_to_get
 	 * @return string
 	 */	
-	function get_meta($attr_to_get)
+	function get_attr($attr_to_get)
 	{
-		return $this->CI->user_adapter->get_meta($attr_to_get);
+		return $this->CI->user_adapter->get_attr($attr_to_get);
 	}
 	
 	// --------------------------------------------------------------------
 
 	/**
-	 * Sets user meta
+	 * Sets user attributes
 	 *
 	 * @access public
 	 * @param string	$attr_to_set
@@ -154,9 +154,9 @@ class User {
 	 * @return boolean
 	 */	
 	
-	function set_meta($attr_to_set, $value)
+	function set_attr($attr_to_set, $value)
 	{
-		return $this->CI->user_adapter->set_meta($attr_to_set, $value);
+		return $this->CI->user_adapter->set_attr($attr_to_set, $value);
 	}
 		
 	// --------------------------------------------------------------------
