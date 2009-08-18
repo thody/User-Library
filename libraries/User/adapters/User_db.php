@@ -203,7 +203,7 @@ class User_db {
 		$this->CI->load->helper('cookie');
 		
 		// Generate a reasonably unique value
-		$token = md5(mt_rand());
+		$token = md5(uniqid(mt_rand(), true));
 		
 		// Set up session pair
 		$session_pair = array(
